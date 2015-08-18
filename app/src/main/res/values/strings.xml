@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">WeatherApp</string>
+    <string name="menu_search">Search</string>
+    <string name="sw_hint">Enter city name</string>
+    <string name="progress_dialog_title">Loading weather data</string>
+    <string name="progress_dialog_msg">Progress..</string>
+    <string name="FORMAT_IMG">http://api.openweathermap.org/img/w/%s.png</string>
+    <string name="FORMAT_CITY_NAME">City name: %s</string>
+    <string name="FORMAT_WIND_SPEED">Wind speed: %s m/s</string>
+    <string name="FORMAT_DEGREE">Degree: %s°</string>
+    <string name="FORMAT_TEMP">Temperature: %d°C</string>
+    <string name="FORMAT_HUMIDITY">Humidity: %s%%</string>
+    <string name="FORMAT_SUNRISE">Sunrise: %s</string>
+    <string name="FORMAT_SUNSET">Sunset: %s</string>
+    <string name="ERR_DIALOG_TAG">error_dialog_tag</string>
+    <string name="toast_err_gps">Google Play Services must be installed.</string>
+    <string name="err_dialog_title">Warning!</string>
+    <string name="err_dialog_msg">City name is wrong\nPlease try again</string>
+</resources>

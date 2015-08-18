@@ -1,0 +1,107 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+
+    <ImageView
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:id="@+id/ivWeather_AM"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvCityName_AM"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="17sp"
+        android:layout_below="@+id/ivWeather_AM"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="City name: "
+        android:freezesText="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvSpeed_AM"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="17sp"
+        android:layout_below="@+id/tvCityName_AM"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="Wind speed: "
+        android:freezesText="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvDegree_AM"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="17sp"
+        android:layout_below="@+id/tvSpeed_AM"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="Degree: "
+        android:freezesText="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvTemperature_AM"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="17sp"
+        android:layout_below="@+id/tvDegree_AM"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="Temperature: "
+        android:freezesText="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvHumidity_AM"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="17sp"
+        android:layout_below="@+id/tvTemperature_AM"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="Humidity: "
+        android:freezesText="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvSunrise_AM"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="17sp"
+        android:layout_below="@+id/tvHumidity_AM"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="Sunrise: "
+        android:freezesText="true"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tvSunset_AM"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:textSize="17sp"
+        android:layout_below="@+id/tvSunrise_AM"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="Sunset: "
+        android:freezesText="true"/>
+
+</RelativeLayout>
