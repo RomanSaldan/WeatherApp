@@ -174,8 +174,7 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
     @Override
     protected void onStop() {
         super.onStop();
-//        swCity_AM.clearFocus();
-//        Variables.setImage(ivWeather_AM.getDrawable());
+        swCity_AM.clearFocus();
     }
 
     /*Convert temperature from Kelvins to Celsius*/
