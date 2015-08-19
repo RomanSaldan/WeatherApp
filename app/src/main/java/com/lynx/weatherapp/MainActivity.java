@@ -46,16 +46,22 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
     private GoogleApiClient     mGoogleApiClient;
     private Location            mLastLocation;
 
-    private String imgUrl;
+    private String mCityName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initUI();
-        Bundle initialBundle = new Bundle();
-        initialBundle.putString(getString(R.string.key_city_name), getString(R.string.default_city));
-        getLoaderManager().initLoader(Constants.WEATHER_LOADER_ID,initialBundle,this);
+        if(savedInstanceState == null) {
+            Bundle initialBundle = new Bundle();
+            initialBundle.putString(getString(R.string.key_city_name), getString(R.string.default_city));
+            getLoaderManager().initLoader(Constants.WEATHER_LOADER_ID, initialBundle, this);
+        } else if(savedInstanceState.containsKey(getString(R.string.key_city_name))) {
+            Bundle initialBundle = new Bundle();
+            initialBundle.putString(getString(R.string.key_city_name), savedInstanceState.getString(getString(R.string.key_city_name)));
+            getLoaderManager().initLoader(Constants.WEATHER_LOADER_ID, initialBundle, this);
+        }
     }
 
     @Override
@@ -133,7 +139,8 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
         Log.d("myLogs", "onLoadFinished(). Cod = " + data.getCod());    // delete in release
 
         if(data.getCod().equals(String.valueOf(HttpURLConnection.HTTP_OK))) {
-            imgUrl = String.format(getString(R.string.FORMAT_IMG), data.getWeathers()[0].getIcon());
+            mCityName = data.getCityName();
+            String imgUrl = String.format(getString(R.string.FORMAT_IMG), data.getWeathers()[0].getIcon());
             Picasso.with(this).load(imgUrl).into(ivWeather_AM);
             tvCityName_AM.setText(String.format(getString(R.string.FORMAT_CITY_NAME), data.getCityName()));
             tvSpeed_AM.setText(String.format(getString(R.string.FORMAT_WIND_SPEED), data.getWind().getSpeed()));
@@ -263,18 +270,7 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(getString(R.string.key_img_url), imgUrl);
+        outState.putString(getString(R.string.key_city_name), mCityName);
         super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        if(savedInstanceState.containsKey(getString(R.string.key_img_url))) {
-            imgUrl = savedInstanceState.getString(getString(R.string.key_img_url));
-            if(imgUrl != null) {
-                Picasso.with(this).load(imgUrl).into(ivWeather_AM);
-            }
-        }
-        super.onRestoreInstanceState(savedInstanceState);
     }
 }
