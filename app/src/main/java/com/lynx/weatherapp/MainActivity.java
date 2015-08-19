@@ -3,7 +3,6 @@ package com.lynx.weatherapp;
 import android.app.Activity;
 
 import android.app.LoaderManager;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.Loader;
 import android.location.Location;
@@ -20,9 +19,10 @@ import android.widget.Toast;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.lynx.weatherapp.global.Constants;
-import com.lynx.weatherapp.global.Variables;
 import com.lynx.weatherapp.model.ResponseData;
 import com.squareup.picasso.Picasso;
 
@@ -31,8 +31,6 @@ import java.util.Date;
 
 public class MainActivity extends Activity implements SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<ResponseData>,
                                                         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
-
-    private ProgressDialog pbProgress_AM;
 
     private ImageView   ivWeather_AM;
     private TextView    tvCityName_AM;
@@ -48,12 +46,16 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
     private GoogleApiClient     mGoogleApiClient;
     private Location            mLastLocation;
 
+    private String imgUrl;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initUI();
-        if(Variables.getImage() != null) ivWeather_AM.setImageDrawable(Variables.getImage());   // restore image
+        Bundle initialBundle = new Bundle();
+        initialBundle.putString(getString(R.string.key_city_name), getString(R.string.default_city));
+        getLoaderManager().initLoader(Constants.WEATHER_LOADER_ID,initialBundle,this);
     }
 
     @Override
@@ -81,8 +83,9 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
     @Override
     public boolean onQueryTextSubmit(String query) {
         swCity_AM.clearFocus();
-        Variables.setCityName(query);
-        getLoaderManager().restartLoader(Constants.WEATHER_LOADER_ID, null, this);
+        Bundle nameBundle = new Bundle();
+        nameBundle.putString(getString(R.string.key_city_name), query);
+        getLoaderManager().restartLoader(Constants.WEATHER_LOADER_ID, nameBundle, this);
         return true;
     }
 
@@ -105,14 +108,22 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
 
     @Override
     public Loader<ResponseData> onCreateLoader(int id, Bundle args) {
-        pbProgress_AM = ProgressDialog.show(this, getString(R.string.progress_dialog_title), getString(R.string.progress_dialog_msg), true);
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                new ProgressDialogFragment().show(getFragmentManager(), getString(R.string.progress_dialog_tag));
+            }
+        });
         switch (id) {
             case Constants.WEATHER_LOADER_ID:
                 Log.d("myLogs", "Loader with city name created");       // delete in release
-                return new MyAsyncLoader(this, Variables.getCityName());
+                return new MyAsyncLoader(getApplicationContext(),
+                        args.getString(getString(R.string.key_city_name)));
             case Constants.WEATHER_GPS_LOADER:
                 Log.d("myLogs", "Loader with location created");        // delete in release
-                return new MyAsyncLoader(this, Variables.getCurrentLat(), Variables.getCurrentLng());
+                return new MyAsyncLoader(getApplicationContext(),
+                        args.getString(getString(R.string.key_lat)),
+                        args.getString(getString(R.string.key_lon)));
         }
         return null; // never
     }
@@ -122,8 +133,8 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
         Log.d("myLogs", "onLoadFinished(). Cod = " + data.getCod());    // delete in release
 
         if(data.getCod().equals(String.valueOf(HttpURLConnection.HTTP_OK))) {
-            Picasso.with(this).load(
-                    String.format(getString(R.string.FORMAT_IMG), data.getWeathers()[0].getIcon())).into(ivWeather_AM);
+            imgUrl = String.format(getString(R.string.FORMAT_IMG), data.getWeathers()[0].getIcon());
+            Picasso.with(this).load(imgUrl).into(ivWeather_AM);
             tvCityName_AM.setText(String.format(getString(R.string.FORMAT_CITY_NAME), data.getCityName()));
             tvSpeed_AM.setText(String.format(getString(R.string.FORMAT_WIND_SPEED), data.getWind().getSpeed()));
             tvDegree_AM.setText(String.format(getString(R.string.FORMAT_DEGREE),data.getWind().getDeg()));
@@ -131,7 +142,13 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
             tvHumidity_AM.setText(String.format(getString(R.string.FORMAT_HUMIDITY),data.getMain().getHumidity()));
             tvSunrise_AM.setText(String.format(getString(R.string.FORMAT_SUNRISE),new Date(Long.parseLong(data.getSys().getSunrise()) * 1000).toString()));
             tvSunset_AM.setText(String.format(getString(R.string.FORMAT_SUNSET), new Date(Long.parseLong(data.getSys().getSunset()) * 1000).toString()));
-            pbProgress_AM.dismiss();
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    if(getFragmentManager().findFragmentByTag(getString(R.string.progress_dialog_tag)) != null)
+                    ((ProgressDialogFragment) getFragmentManager().findFragmentByTag(getString(R.string.progress_dialog_tag))).dismiss();
+                }
+            });
         } else {
             new Handler().post(new Runnable() {
                 @Override
@@ -139,7 +156,13 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
                     new ErrorDialogFragment().show(getFragmentManager(), getString(R.string.ERR_DIALOG_TAG));
                 }
             });
-            pbProgress_AM.dismiss();
+            new Handler().post(new Runnable() {
+                @Override
+                public void run() {
+                    if(getFragmentManager().findFragmentByTag(getString(R.string.progress_dialog_tag)) != null)
+                    ((ProgressDialogFragment) getFragmentManager().findFragmentByTag(getString(R.string.progress_dialog_tag))).dismiss();
+                }
+            });
         }
     }
 
@@ -151,8 +174,8 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
     @Override
     protected void onStop() {
         super.onStop();
-        swCity_AM.clearFocus();
-        Variables.setImage(ivWeather_AM.getDrawable());
+//        swCity_AM.clearFocus();
+//        Variables.setImage(ivWeather_AM.getDrawable());
     }
 
     /*Convert temperature from Kelvins to Celsius*/
@@ -201,12 +224,32 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
 
     @Override
     public void onConnected(Bundle bundle) {
+        final Bundle locationBundle = new Bundle();
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mLastLocation != null) {
-            Variables.setCurrentLat(String.valueOf(mLastLocation.getLatitude()));
-            Variables.setCurrentLng(String.valueOf(mLastLocation.getLongitude()));
+            locationBundle.putString(getString(R.string.key_lat), String.valueOf(mLastLocation.getLatitude()));
+            locationBundle.putString(getString(R.string.key_lon), String.valueOf(mLastLocation.getLongitude()));
+            getLoaderManager().restartLoader(Constants.WEATHER_GPS_LOADER, locationBundle, this);
+        } else {
+            LocationRequest mLocationRequest = new LocationRequest();
+            mLocationRequest.setInterval(10000);
+            mLocationRequest.setFastestInterval(5000);
+            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+            Toast.makeText(this, R.string.toast_err_need_gps, Toast.LENGTH_LONG).show();
+
+            LocationListener listener = new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                    locationBundle.putString(getString(R.string.key_lat), String.valueOf(location.getLatitude()));
+                    locationBundle.putString(getString(R.string.key_lon), String.valueOf(location.getLongitude()));
+                    LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+                    getLoaderManager().restartLoader(Constants.WEATHER_GPS_LOADER, locationBundle, MainActivity.this);
+                }
+            };
+
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, listener);
         }
-        getLoaderManager().restartLoader(Constants.WEATHER_GPS_LOADER, null, this);
     }
 
     @Override
@@ -217,5 +260,22 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putString(getString(R.string.key_img_url), imgUrl);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        if(savedInstanceState.containsKey(getString(R.string.key_img_url))) {
+            imgUrl = savedInstanceState.getString(getString(R.string.key_img_url));
+            if(imgUrl != null) {
+                Picasso.with(this).load(imgUrl).into(ivWeather_AM);
+            }
+        }
+        super.onRestoreInstanceState(savedInstanceState);
     }
 }

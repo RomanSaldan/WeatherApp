@@ -16,4 +16,11 @@
     <string name="toast_err_gps">Google Play Services must be installed.</string>
     <string name="err_dialog_title">Warning!</string>
     <string name="err_dialog_msg">City name is wrong\nPlease try again</string>
+    <string name="toast_err_need_gps">Weather for current location will download as soon as you turn on GPS</string>
+    <string name="key_lat">lat</string>
+    <string name="key_lon">lon</string>
+    <string name="progress_dialog_tag">progress_dialog_tag</string>
+    <string name="key_city_name">cityName</string>
+    <string name="key_img_url">imgUrl</string>
+    <string name="default_city">London</string>
 </resources>

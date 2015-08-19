@@ -2,6 +2,7 @@ package com.lynx.weatherapp;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.util.Log;
 
 import com.lynx.weatherapp.global.Constants;
 import com.lynx.weatherapp.model.ResponseData;
@@ -25,6 +26,7 @@ public class MyAsyncLoader extends AsyncTaskLoader<ResponseData> {
     /*Overloaded for city name*/
     public MyAsyncLoader(Context context, String cityName) {
         super(context);
+        Log.d("myLogs", "Loader : constructor()");
         this.mCityName = cityName;
         mRestAdapter = new RestAdapter.Builder().setEndpoint(Constants.BASE_URL).build();
         mApiInterface = mRestAdapter.create(ApiInterface.class);
@@ -33,6 +35,7 @@ public class MyAsyncLoader extends AsyncTaskLoader<ResponseData> {
     /*Overloaded for coordinates*/
     public MyAsyncLoader(Context context, String lat, String lon) {
         super(context);
+        Log.d("myLogs", "Loader : constructor()");
         this.mLat = lat;
         this.mLon = lon;
         mRestAdapter = new RestAdapter.Builder().setEndpoint(Constants.BASE_URL).build();
@@ -41,6 +44,7 @@ public class MyAsyncLoader extends AsyncTaskLoader<ResponseData> {
 
     @Override
     public ResponseData loadInBackground() {    // magic is here
+        Log.d("myLogs", "Loader : doInBackground()");
         if(mCityName != null) {
             mData = mApiInterface.getWeather(mCityName);
             return mData;
@@ -53,4 +57,5 @@ public class MyAsyncLoader extends AsyncTaskLoader<ResponseData> {
     protected void onStartLoading() {
         forceLoad();
     }
+
 }
