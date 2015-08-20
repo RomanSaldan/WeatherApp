@@ -5,14 +5,16 @@ import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.Loader;
+import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.SearchView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,12 +24,23 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Places;
 import com.lynx.weatherapp.global.Constants;
 import com.lynx.weatherapp.model.ResponseData;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+
 
 public class MainActivity extends Activity implements SearchView.OnQueryTextListener, LoaderManager.LoaderCallbacks<ResponseData>,
                                                         GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -41,12 +54,14 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
     private TextView    tvSunrise_AM;
     private TextView    tvSunset_AM;
 
-    private SearchView swCity_AM;
+    private SearchView  swCity_AM;
 
     private GoogleApiClient     mGoogleApiClient;
     private Location            mLastLocation;
 
     private String mCityName;
+    private ArrayList<String> predictions;
+    private SimpleCursorAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +77,13 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
             initialBundle.putString(getString(R.string.key_city_name), savedInstanceState.getString(getString(R.string.key_city_name)));
             getLoaderManager().initLoader(Constants.WEATHER_LOADER_ID, initialBundle, this);
         }
+        buildGoogleApiClient();
+        adapter = new SimpleCursorAdapter(this,
+                android.R.layout.simple_list_item_1,
+                null,
+                new String[] {getString(R.string.column_name)},
+                new int[] {android.R.id.text1},
+                SimpleCursorAdapter.FLAG_AUTO_REQUERY);
     }
 
     @Override
@@ -70,6 +92,22 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
         swCity_AM   = (SearchView) menu.findItem(R.id.search).getActionView();
         swCity_AM   .setQueryHint(getString(R.string.sw_hint));
         swCity_AM   .setOnQueryTextListener(this);
+        swCity_AM   .setSuggestionsAdapter(adapter);
+        swCity_AM.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int position) {
+                return false;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int position) {
+                Cursor c = ((Cursor)swCity_AM.getSuggestionsAdapter().getItem(position));
+                String name = c.getString(c.getColumnIndex(getString(R.string.column_name)));
+                String[] parts = name.split(",");
+                swCity_AM.setQuery(parts[0], true);
+                return true;
+            }
+        });
         return true;
     }
 
@@ -78,7 +116,6 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
         switch (item.getItemId()) {
             case R.id.location:
                 if(checkGooglePlayServices()) {
-                    buildGoogleApiClient();
                     mGoogleApiClient.connect();
                 }
                 break;
@@ -96,8 +133,70 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
     }
 
     @Override
-    public boolean onQueryTextChange(String newText) {
+    public boolean onQueryTextChange(final String newText) {
+        new Thread(new Runnable() {
+            public void run() {
+                if(newText.length()>2) {
+                    predictions = getPredictions(newText);   // @NULLABLE
+                    final MatrixCursor cursor = new MatrixCursor(new String[] {getString(R.string.column_id), getString(R.string.column_name)});
+                    int i = 1;
+                    if(predictions != null) for(String s : predictions) {
+                        cursor.addRow(new Object[] {i++, s});
+                    }
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            adapter.swapCursor(cursor);
+                            adapter.notifyDataSetChanged();
+                        }
+                    });
+                }
+            }
+        }).start();
         return false;
+    }
+
+    /*Get cities predictions base in passed text*/
+    private ArrayList<String> getPredictions(String text) {
+        ArrayList<String> result = new ArrayList<>();
+        HttpURLConnection conn = null;
+        StringBuilder jsonResults = new StringBuilder();
+        String strURL = "https://maps.googleapis.com/maps/api/place/autocomplete/json?input="
+                + text + "&types=(cities)&&key=AIzaSyDV9bLFPB2dUKGEc-u9_V9OLHg_2TM81Tg";
+        URL url;
+        /*Get JSON*/
+        try {
+            url = new URL(strURL);
+            conn = (HttpURLConnection) url.openConnection();
+            InputStreamReader in = new InputStreamReader(conn.getInputStream());
+            int read;
+            char[] buff = new char[1024];
+            while ((read = in.read(buff)) != -1) {
+                jsonResults.append(buff, 0, read);
+            }
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (conn != null) {
+                conn.disconnect();
+            }
+        }
+        /*Parse JSON*/
+        try {
+            JSONObject jsonObj = new JSONObject(jsonResults.toString());
+            JSONArray predsJsonArray = jsonObj.getJSONArray(getString(R.string.json_tag_predictions));
+            for (int i = 0; i < predsJsonArray.length(); i++) {
+                result.add(predsJsonArray.getJSONObject(i).getString(getString(R.string.json_tag_description)));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return result;
     }
 
     /*Init views*/
@@ -122,11 +221,9 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
         });
         switch (id) {
             case Constants.WEATHER_LOADER_ID:
-                Log.d("myLogs", "Loader with city name created");       // delete in release
                 return new MyAsyncLoader(getApplicationContext(),
                         args.getString(getString(R.string.key_city_name)));
             case Constants.WEATHER_GPS_LOADER:
-                Log.d("myLogs", "Loader with location created");        // delete in release
                 return new MyAsyncLoader(getApplicationContext(),
                         args.getString(getString(R.string.key_lat)),
                         args.getString(getString(R.string.key_lon)));
@@ -136,8 +233,6 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
 
     @Override
     public void onLoadFinished(Loader<ResponseData> loader, ResponseData data) {
-        Log.d("myLogs", "onLoadFinished(). Cod = " + data.getCod());    // delete in release
-
         if(data.getCod().equals(String.valueOf(HttpURLConnection.HTTP_OK))) {
             mCityName = data.getCityName();
             String imgUrl = String.format(getString(R.string.FORMAT_IMG), data.getWeathers()[0].getIcon());
@@ -225,6 +320,8 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
+                .addApi(Places.GEO_DATA_API)
+                .addApi(Places.PLACE_DETECTION_API)
                 .build();
     }
 

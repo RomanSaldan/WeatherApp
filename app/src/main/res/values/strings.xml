@@ -23,4 +23,8 @@
     <string name="key_city_name">cityName</string>
     <string name="key_img_url">imgUrl</string>
     <string name="default_city">London</string>
+    <string name="column_name">name</string>
+    <string name="column_id">_id</string>
+    <string name="json_tag_predictions">predictions</string>
+    <string name="json_tag_description">description</string>
 </resources>

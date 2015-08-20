@@ -25,4 +25,7 @@ public class Constants {
     public static final String GSON_SUNRISE             = "sunrise";
     public static final String GSON_SUNSET              = "sunset";
 
+    public static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
+    public static final String TYPE_AUTOCOMPLETE = "/autocomplete";
+    public static final String OUT_JSON = "/json";
 }
