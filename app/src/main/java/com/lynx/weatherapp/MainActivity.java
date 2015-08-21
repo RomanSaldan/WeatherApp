@@ -103,8 +103,7 @@ public class MainActivity extends Activity implements SearchView.OnQueryTextList
             public boolean onSuggestionClick(int position) {
                 Cursor c = ((Cursor)swCity_AM.getSuggestionsAdapter().getItem(position));
                 String name = c.getString(c.getColumnIndex(getString(R.string.column_name)));
-                String[] parts = name.split(",");
-                swCity_AM.setQuery(parts[0], true);
+                swCity_AM.setQuery(name, true);
                 return true;
             }
         });
