@@ -1,8 +1,9 @@
 package com.lynx.weatherapp;
 
+import com.lynx.weatherapp.global.Constants;
 import com.lynx.weatherapp.model.ResponseData;
+import com.lynx.weatherapp.model.ResponseQuery;
 
-import retrofit.Callback;
 import retrofit.http.GET;
 import retrofit.http.Query;
 
@@ -11,10 +12,16 @@ import retrofit.http.Query;
  */
 public interface ApiInterface {
 
-    @GET("/data/2.5/weather")
-    ResponseData getWeather(@Query("q") String city);
+    @GET(Constants.RF_WEATHER_PATH)
+    ResponseData getWeather(@Query(Constants.RF_QUERY_Q) String city);
 
-    @GET("/data/2.5/weather")
-    ResponseData getWeatherByGPS(@Query("lat") String lat, @Query("lon") String lon);
+    @GET(Constants.RF_WEATHER_PATH)
+    ResponseData getWeatherByGPS(@Query(Constants.RF_QUERY_LAT) String lat,
+                                 @Query(Constants.RF_QUERY_LON) String lon);
+
+    @GET(Constants.RF_PREDICTIONS_PATH)
+    ResponseQuery getPredictionsModel(@Query(Constants.RF_QUERY_INPUT) String input,
+                                      @Query(Constants.RF_QUERY_TYPES) String types,
+                                      @Query(Constants.RF_QUERY_KEY) String key);
 
 }

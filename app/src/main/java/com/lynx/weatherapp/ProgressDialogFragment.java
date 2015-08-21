@@ -12,7 +12,9 @@ public class ProgressDialogFragment extends DialogFragment {
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        ProgressDialog progressDialog = ProgressDialog.show(getActivity(), "Loading", "Update new data", true);
+        ProgressDialog progressDialog = ProgressDialog.show(getActivity(),
+                                                            getString(R.string.progress_dialog_title),
+                                                            getString(R.string.progress_dialog_msg), true);
         return progressDialog;
     }
 

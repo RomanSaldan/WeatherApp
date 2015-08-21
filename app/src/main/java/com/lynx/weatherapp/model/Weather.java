@@ -1,22 +1,23 @@
 package com.lynx.weatherapp.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.lynx.weatherapp.global.Constants;
 
 /**
  * Created by WORK on 17.08.2015.
  */
 public class Weather {
 
-    @SerializedName("id")
+    @SerializedName(Constants.GSON_ID)
     String id;
 
-    @SerializedName("main")
+    @SerializedName(Constants.GSON_MAIN)
     String main;
 
-    @SerializedName("description")
+    @SerializedName(Constants.GSON_DESCRIPTION)
     String description;
 
-    @SerializedName("icon")
+    @SerializedName(Constants.GSON_ICON)
     String icon;
 
     public String getId() {

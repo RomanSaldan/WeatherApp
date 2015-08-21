@@ -2,7 +2,6 @@ package com.lynx.weatherapp;
 
 import android.content.AsyncTaskLoader;
 import android.content.Context;
-import android.util.Log;
 
 import com.lynx.weatherapp.global.Constants;
 import com.lynx.weatherapp.model.ResponseData;

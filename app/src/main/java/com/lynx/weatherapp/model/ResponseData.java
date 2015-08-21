@@ -1,43 +1,44 @@
 package com.lynx.weatherapp.model;
 
 import com.google.gson.annotations.SerializedName;
+import com.lynx.weatherapp.global.Constants;
 
 /**
  * Created by WORK on 17.08.2015.
  */
 public class ResponseData {
 
-    @SerializedName("coord")
+    @SerializedName(Constants.GSON_COORD)
     Cordinate cordinate;
 
-    @SerializedName("sys")
+    @SerializedName(Constants.GSON_SYS)
     System sys;
 
-    @SerializedName("main")
+    @SerializedName(Constants.GSON_MAIN)
     Main main;
 
-    @SerializedName("base")
+    @SerializedName(Constants.GSON_BASE)
     String base;
 
-    @SerializedName("dt")
+    @SerializedName(Constants.GSON_DT)
     String dt;
 
-    @SerializedName("id")
+    @SerializedName(Constants.GSON_ID)
     String id;
 
-    @SerializedName("name")
+    @SerializedName(Constants.GSON_NAME)
     String cityName;
 
-    @SerializedName("cod")
+    @SerializedName(Constants.GSON_COD)
     String cod;
 
-    @SerializedName("wind")
+    @SerializedName(Constants.GSON_WIND)
     Wind wind;
 
-    @SerializedName("weather")
+    @SerializedName(Constants.GSON_WEATHER)
     Weather[] weathers;
 
-    @SerializedName("clouds")
+    @SerializedName(Constants.GSON_CLOUDS)
     Clouds clouds;
 
     public Weather[] getWeathers() {
